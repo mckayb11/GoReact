@@ -1,0 +1,119 @@
+echo "# GoReact" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/mckayb11/GoReact.git
+git push -u origin main
+
+IN R
+
+
+
+
+Reading in data:
+
+
+```{r}
+crash_data <- read.csv("/Users/mckaybruse/Downloads/monroe-county-crash-data2003-to-2015.csv",header = TRUE)
+```
+
+packages used:
+
+```{r}
+required_packages <- c('MASS', 'rcompanion', 'lsr', 'vcd', 'DescTools')
+for (p in required_packages) {
+  if(!require(p,character.only = TRUE)) {
+    install.packages(p, dep = TRUE)
+  }
+}
+```
+
+
+
+```{r}
+library(tidyr)
+library(tidyverse)
+library(ggplot2)
+library(shiny)
+library(RgoogleMaps)
+library(GGally)
+library(ggmap)
+#library(MASS, 'rcompanion', 'lsr', 'vcd', 'DescTools')
+```
+
+
+
+
+```{r}
+head(crash_data)
+```
+
+At a minimum, be sure to answer the following questions in your analysis:
+1. What streets have the most crashes?
+
+
+```{r}
+ frequency_crashes <- as.data.frame(table(crash_data$Reported_Location))
+
+frequency_crashes[order(-frequency_crashes$Freq) ,]
+
+most_crashes <- head(frequency_crashes[order(-frequency_crashes$Freq) ,])
+most_crashes
+```
+We see by manipulating the data a little bit, that E 3RD ST and W 3RD ST had the most crashes, with correlaing vaues of 375 and 222.
+
+
+
+2. What correlations can be found between crash time, day of the week, and location?
+
+
+Since we are looking at categorical variables, we need to use a Chi-Square test. Using A normal corr funcion won't work becuase the data is not numeric
+```{r}
+
+
+ggcorr(crash_data)
+
+#change our values to characters
+crash_data$Day <- as.character(crash_data$Day)
+crash_data$Hour <- as.character(crash_data$Hour)
+
+
+chisq.test(crash_data$Reported_Location,crash_data$Day)
+
+chisq.test(crash_data$Reported_Location,crash_data$Hour)
+
+chisq.test(crash_data$Hour,crash_data$Day)
+
+```
+
+From our Chi Squared test, we see get super small p-value, which leads us to believe that day of the week, Time of crash, and crash location have a high correlation. 
+
+
+
+3. As a stretch goal, consider plotting the crashes via google maps.
+
+```{r}
+?register_google
+get_local_spot <-  get_map("United States", maptype = "roadmap", zoom = 10) 
+
+ggmap(get_local_spot) + 
+  geom_point(data = crash_data, aes(x = crash_data$Longitude, y = crash_data$Latitude), color = "navy", size = 1)
+
+```
+
+THis is all the code to plot the data in Google maps. Unfortunately, we would need to register with Google maps and pay money to do this in R. Here is what it says when I use the code:
+
+  As of mid-2018, the Google Maps Platform requires a registered API key. While this alleviates previous burdens (e.g. query limits), it creates some challenges as well. The most immediate challenge for most R users is that ggmap functions that use Google's services no longer function out of the box, since the user has to setup an account with Google, enable the relevant APIs, and then tell R about the user's setup.
+
+  To obtain an API key and enable services, go to https://cloud.google.com/maps-platform/. This documentation shows you how to input the requisite information (e.g. your API key) into R, and it also shows you a few tools that can help you work with the credentialing.
+
+
+I'm not sure if you wanted me to actually spend money plotting the data, If you would like me to in the future, that is no problem!
+
+ 
+
+We expect the analysis to be completed via Python or R. Please commit your scripts and work for this analysis to github and include your repository link when submitting your analysis. We look forward to hearing from you!
+
+
+                
